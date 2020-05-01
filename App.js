@@ -25,6 +25,7 @@ export default function App() {
   const [selectedFilter, setSelectedFilter] = React.useState("");
   const [location, setLocation] = React.useState(null);
   const [errorMsg, setErrorMsg] = React.useState(null);
+  const [refreshLocation, setRefreshLocation] = React.useState(true);
 
   React.useEffect(() => {
     async function getLocation() {
@@ -35,10 +36,12 @@ export default function App() {
 
       let location = await Location.getCurrentPositionAsync({});
       setLocation(location);
-      console.log(location.coords);
+      setRefreshLocation(false);
     }
-    getLocation();
-  }, []);
+    if (refreshLocation) {
+      getLocation();
+    }
+  }, [refreshLocation, setRefreshLocation]);
 
   function filterBy(store) {
     if (selectedFilter !== "") {
@@ -75,7 +78,12 @@ export default function App() {
             </Picker>
           </View>
           <React.Suspense fallback={<Loader />}>
-            <StoresList location={location} filterBy={filterBy} />
+            <StoresList
+              location={location}
+              filterBy={filterBy}
+              refreshLocation={refreshLocation}
+              setRefreshLocation={setRefreshLocation}
+            />
           </React.Suspense>
         </>
       ) : (

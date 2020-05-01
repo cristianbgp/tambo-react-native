@@ -7,14 +7,25 @@ function fetcher(url) {
   return fetch(url).then((res) => res.json());
 }
 
-export default function StoresList({ location, filterBy }) {
+export default function StoresList({
+  location,
+  filterBy,
+  refreshLocation,
+  setRefreshLocation,
+}) {
   const {
     data: responseStores,
+    revalidate,
   } = useSWR(
     `https://tambo-api.herokuapp.com/nearest?currentLatitude=${location.coords.latitude}&currentLongitude=${location.coords.longitude}`,
     fetcher,
     { suspense: true }
   );
+
+  function onRefresh() {
+    setRefreshLocation(true);
+    revalidate();
+  }
 
   return (
     <View style={styles.container}>
@@ -29,6 +40,8 @@ export default function StoresList({ location, filterBy }) {
           );
         }}
         keyExtractor={(item) => item.id}
+        onRefresh={onRefresh}
+        refreshing={refreshLocation}
       />
     </View>
   );
