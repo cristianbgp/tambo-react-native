@@ -1,0 +1,4 @@
+{
+  "compilerOptions": {},
+  "extends": "eslint-config-react-native-wcandillon/tsconfig.base"
+}

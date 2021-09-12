@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import {
   View,
   Text,
@@ -6,12 +6,32 @@ import {
   TouchableOpacity,
   Linking,
 } from "react-native";
-import { ATMIcon, AllDayIcon, MapPinIcon } from "./icons";
 
-export default function StoreCard({ store, isFirst }) {
+import { MapPinIcon } from "./Icons";
+
+type Coords = {
+  latitude: string;
+  longitude: string;
+};
+
+type StoreType = {
+  address: string;
+  coords: Coords;
+  distance: number;
+  gmapLink: number;
+  id: string;
+  name: string;
+};
+
+type StoreCardTypes = {
+  store: StoreType;
+  isFirst: boolean;
+};
+
+export default function StoreCard({ store, isFirst }: StoreCardTypes) {
   function handleOnPress() {
     Linking.openURL(
-      `https://maps.google.com/?q=${store.latitude},${store.longitude}`
+      `https://maps.google.com/?q=${store.coords.latitude},${store.coords.longitude}`
     );
   }
 
@@ -28,28 +48,18 @@ export default function StoreCard({ store, isFirst }) {
         }}
       >
         <Text style={styles.title}>{store.name}</Text>
-        <View style={styles.iconContainer}>
-          <MapPinIcon />
-        </View>
       </View>
       <View style={styles.divider} />
       <Text style={styles.distance}>
         {store.distance < 1000
-          ? `${parseInt(store.distance)}m`
+          ? `${Math.floor(store.distance)}m`
           : `${(store.distance / 1000).toFixed(2)}km`}
       </Text>
       <Text style={styles.address}>{store.address.toLowerCase()}</Text>
       <View style={styles.iconsSection}>
-        {store.allday && (
-          <View style={styles.iconContainer}>
-            <AllDayIcon />
-          </View>
-        )}
-        {store.atm && (
-          <View style={styles.iconContainer}>
-            <ATMIcon />
-          </View>
-        )}
+        <View style={styles.iconContainer}>
+          <MapPinIcon />
+        </View>
       </View>
     </TouchableOpacity>
   );

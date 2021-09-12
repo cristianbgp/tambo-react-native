@@ -1,36 +1,47 @@
-import React from "react";
+import * as React from "react";
 import { View, FlatList, StyleSheet } from "react-native";
 import useSWR from "swr";
-import StoreCard from "./store-card";
+import type * as Location from "expo-location";
+import { stringify } from "qs";
 
-function fetcher(url) {
+import StoreCard from "./StoreCard";
+
+function fetcher(url: string) {
   return fetch(url).then((res) => res.json());
 }
 
+type StoreListTypes = {
+  location: Location.LocationObject;
+  refreshLocation: boolean;
+  setRefreshLocation: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
 export default function StoresList({
   location,
-  filterBy,
   refreshLocation,
   setRefreshLocation,
-}) {
+}: StoreListTypes) {
   const {
-    data: responseStores,
-    revalidate,
+    data: { data: responseStores },
+    mutate,
   } = useSWR(
-    `https://tambo-api.herokuapp.com/nearest?currentLatitude=${location.coords.latitude}&currentLongitude=${location.coords.longitude}`,
+    `https://tambo.cristianbgp.com/api/nearest?${stringify({
+      currentLatitude: location.coords.latitude,
+      currentLongitude: location.coords.longitude,
+    })}`,
     fetcher,
     { suspense: true }
   );
 
   function onRefresh() {
     setRefreshLocation(true);
-    revalidate();
+    mutate();
   }
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={responseStores.filter(filterBy)}
+        data={responseStores}
         renderItem={({ item: store, index }) => {
           const isFirst = index === 0;
           return (
@@ -42,6 +53,7 @@ export default function StoresList({
         keyExtractor={(item) => item.id}
         onRefresh={onRefresh}
         refreshing={refreshLocation}
+        contentContainerStyle={{ paddingTop: 20 }}
       />
     </View>
   );
@@ -50,6 +62,7 @@ export default function StoresList({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: "100%",
   },
   cardExtraContainer: {
     alignItems: "center",
